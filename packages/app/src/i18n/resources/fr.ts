@@ -2218,6 +2218,9 @@ export const fr: TranslationResources = {
         description: "Choisissez les éléments affichés en haut de la barre latérale et leur ordre",
         moveUp: "Déplacer vers le haut",
         moveDown: "Déplacer vers le bas",
+        visibleWorkspacesLabel: "Espaces de travail par projet",
+        visibleWorkspacesHint:
+          "Afficher ce nombre d’espaces de travail dans chaque projet avant Afficher plus",
       },
       fonts: {
         title: "Polices",

@@ -2197,6 +2197,9 @@ export const ptBR: TranslationResources = {
         description: "Escolha quais itens aparecem no topo da barra lateral e em que ordem",
         moveUp: "Mover para cima",
         moveDown: "Mover para baixo",
+        visibleWorkspacesLabel: "Espaços de trabalho por projeto",
+        visibleWorkspacesHint:
+          "Mostrar esta quantidade de espaços de trabalho em cada projeto antes de Mostrar mais",
       },
       fonts: {
         title: "Fontes",

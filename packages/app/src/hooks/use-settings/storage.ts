@@ -36,6 +36,11 @@ export type PullRequestOpenLocation = "main" | "side" | "explorer";
 export type SidebarWorkspaceTrailing = "diff" | "timestamp" | "none";
 export type ToolCallDetailLevel = "overview" | "detailed";
 
+/** Number of workspaces shown in each project before the user expands the group. */
+export const DEFAULT_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT = 10;
+export const MIN_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT = 1;
+export const MAX_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT = 100;
+
 const ThemePreferenceSchema = z.enum([
   ...THEME_OPTIONS.map((option) => option.name),
   PLUGIN_THEME_PREFERENCE,
@@ -81,6 +86,7 @@ export interface AppSettings {
   syntaxTheme: SyntaxThemeId; // default "one"
   workspaceTitleSource: WorkspaceTitleSource;
   sidebarWorkspaceTrailing: SidebarWorkspaceTrailing;
+  sidebarVisibleWorkspacesPerProject: number;
   sidebarRowItems: SidebarRowItems;
   sidebarChecksDisplay: SidebarChecksDisplay;
   /** Top-level sidebar rows in display order; empty means the default order, all visible. */
@@ -135,6 +141,7 @@ export const DEFAULT_CLIENT_SETTINGS: AppSettings = {
   syntaxTheme: "one",
   workspaceTitleSource: "title",
   sidebarWorkspaceTrailing: "diff",
+  sidebarVisibleWorkspacesPerProject: DEFAULT_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
   sidebarRowItems: DEFAULT_SIDEBAR_ROW_ITEMS,
   sidebarChecksDisplay: DEFAULT_SIDEBAR_CHECKS_DISPLAY,
   sidebarNavItems: [],
@@ -221,6 +228,10 @@ const StoredAppSettingsSchema = z
     syntaxTheme: z.string().refine(isSyntaxThemeId).catch("one"),
     workspaceTitleSource: z.enum(["title", "branch"]).catch("title"),
     sidebarWorkspaceTrailing: z.enum(["diff", "timestamp", "none"]).catch("diff"),
+    sidebarVisibleWorkspacesPerProject: clampedNumber(
+      MIN_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
+      MAX_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
+    ).catch(DEFAULT_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT),
     sidebarRowItems: SidebarRowItemsSchema,
     sidebarChecksDisplay: z
       .enum(["iconAndText", "icon", "none"])

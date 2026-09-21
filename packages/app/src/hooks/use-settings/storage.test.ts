@@ -7,7 +7,10 @@ import {
   DEFAULT_CLIENT_SETTINGS,
   DEFAULT_CODE_FONT_SIZE,
   DEFAULT_CONTENT_FONT_SIZE,
+  DEFAULT_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
   DEFAULT_UI_BASE_FONT_SIZE,
+  MAX_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
+  MIN_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
   defaultUiBaseFontSize,
   defaultContentFontSize,
   loadAppSettingsFromStorage,
@@ -310,6 +313,38 @@ describe("loadAppSettingsFromStorage", () => {
     const result = await loadAppSettingsFromStorage(deps);
 
     expect(result.workspaceTitleSource).toBe("branch");
+  });
+
+  it("defaults the visible workspace count per project", async () => {
+    const result = await loadAppSettingsFromStorage(makeDeps());
+
+    expect(result.sidebarVisibleWorkspacesPerProject).toBe(
+      DEFAULT_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
+    );
+  });
+
+  it("clamps the visible workspace count per project", async () => {
+    const belowMinimum = await loadAppSettingsFromStorage(
+      makeDeps({
+        storage: createInMemoryKeyValueStorage({
+          [APP_SETTINGS_KEY]: JSON.stringify({ sidebarVisibleWorkspacesPerProject: 0 }),
+        }),
+      }),
+    );
+    const aboveMaximum = await loadAppSettingsFromStorage(
+      makeDeps({
+        storage: createInMemoryKeyValueStorage({
+          [APP_SETTINGS_KEY]: JSON.stringify({ sidebarVisibleWorkspacesPerProject: 101 }),
+        }),
+      }),
+    );
+
+    expect(belowMinimum.sidebarVisibleWorkspacesPerProject).toBe(
+      MIN_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
+    );
+    expect(aboveMaximum.sidebarVisibleWorkspacesPerProject).toBe(
+      MAX_SIDEBAR_VISIBLE_WORKSPACES_PER_PROJECT,
+    );
   });
 
   it("drops an unknown workspace title source back to title", async () => {

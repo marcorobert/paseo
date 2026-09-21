@@ -2181,6 +2181,8 @@ export const ja: TranslationResources = {
         description: "サイドバー上部に表示する項目とその順序を選択します",
         moveUp: "上に移動",
         moveDown: "下に移動",
+        visibleWorkspacesLabel: "プロジェクトごとのワークスペース数",
+        visibleWorkspacesHint: "さらに表示するまで各プロジェクトに表示するワークスペース数",
       },
       fonts: {
         title: "フォント",

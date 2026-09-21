@@ -2138,6 +2138,8 @@ export const zhCN: TranslationResources = {
         description: "选择侧边栏顶部显示的项目及其顺序",
         moveUp: "上移",
         moveDown: "下移",
+        visibleWorkspacesLabel: "每个项目的工作区数量",
+        visibleWorkspacesHint: "在“显示更多”之前，每个项目显示的工作区数量",
       },
       fonts: {
         title: "字体",

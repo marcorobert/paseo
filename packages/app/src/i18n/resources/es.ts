@@ -2215,6 +2215,9 @@ export const es: TranslationResources = {
           "Elige qué elementos aparecen en la parte superior de la barra lateral y en qué orden",
         moveUp: "Mover hacia arriba",
         moveDown: "Mover hacia abajo",
+        visibleWorkspacesLabel: "Espacios de trabajo por proyecto",
+        visibleWorkspacesHint:
+          "Muestra esta cantidad de espacios de trabajo en cada proyecto antes de Mostrar más",
       },
       fonts: {
         title: "Fuentes",

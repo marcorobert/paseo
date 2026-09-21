@@ -2162,6 +2162,8 @@ export const ar: TranslationResources = {
         description: "اختر العناصر التي تظهر أعلى الشريط الجانبي وترتيبها",
         moveUp: "نقل لأعلى",
         moveDown: "نقل لأسفل",
+        visibleWorkspacesLabel: "مساحات العمل لكل مشروع",
+        visibleWorkspacesHint: "اعرض هذا العدد من مساحات العمل في كل مشروع قبل عرض المزيد",
       },
       fonts: {
         title: "الخطوط",

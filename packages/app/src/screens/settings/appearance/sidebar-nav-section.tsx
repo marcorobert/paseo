@@ -15,9 +15,10 @@ import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { Button } from "@/components/ui/button";
 import { Shortcut } from "@/components/ui/shortcut";
 import { Switch } from "@/components/ui/switch";
+import { SettingsSelect, SettingsSection } from "@/components/settings";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { useAppSettings } from "@/hooks/use-settings";
 import { resolvePluginIcon } from "@/plugins/icons";
-import { SettingsSection } from "@/components/settings/headings/settings-section";
 import {
   builtinSidebarNavLabelKey,
   builtinSidebarNavShortcutAction,
@@ -42,6 +43,8 @@ const BUILTIN_ICONS: Record<BuiltinSidebarNavId, LucideIcon> = {
   search: Search,
   schedules: CalendarClock,
 };
+
+const VISIBLE_WORKSPACES_PER_PROJECT_OPTIONS = [5, 10, 20, 50] as const;
 
 function NavIcon({ Icon, color = "" }: { Icon: LucideIcon; color?: string }) {
   return <Icon size={ICON_SIZE.md} color={color} />;
@@ -137,6 +140,21 @@ function SidebarNavRow({
 export function SidebarNavSection(): ReactElement {
   const { t } = useTranslation();
   const { items, setVisible, move } = useSidebarNavItems();
+  const { settings, updateSettings } = useAppSettings();
+  const workspaceLimitOptions = useMemo(
+    () =>
+      VISIBLE_WORKSPACES_PER_PROJECT_OPTIONS.map((value) => ({
+        value: String(value),
+        label: String(value),
+      })),
+    [],
+  );
+  const handleWorkspaceLimitChange = useCallback(
+    (value: string) => {
+      void updateSettings({ sidebarVisibleWorkspacesPerProject: Number(value) });
+    },
+    [updateSettings],
+  );
 
   return (
     <SettingsSection
@@ -155,6 +173,16 @@ export function SidebarNavSection(): ReactElement {
             onSetVisible={setVisible}
           />
         ))}
+      </View>
+      <View style={settingsStyles.card}>
+        <SettingsSelect
+          label={t("settings.appearance.sidebar.visibleWorkspacesLabel")}
+          hint={t("settings.appearance.sidebar.visibleWorkspacesHint")}
+          value={String(settings.sidebarVisibleWorkspacesPerProject)}
+          options={workspaceLimitOptions}
+          onValueChange={handleWorkspaceLimitChange}
+          testID="sidebar-visible-workspaces-per-project"
+        />
       </View>
     </SettingsSection>
   );

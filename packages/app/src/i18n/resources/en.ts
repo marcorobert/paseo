@@ -2282,6 +2282,8 @@ export const en = {
         description: "Choose which items appear at the top of the sidebar and in what order",
         moveUp: "Move up",
         moveDown: "Move down",
+        visibleWorkspacesLabel: "Workspaces per project",
+        visibleWorkspacesHint: "Show this many workspaces in each project before Show more",
       },
       fonts: {
         title: "Fonts",

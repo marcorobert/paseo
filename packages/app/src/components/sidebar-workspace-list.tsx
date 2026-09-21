@@ -69,6 +69,7 @@ import {
   type SidebarGroupMode,
 } from "@/stores/sidebar-view-store";
 import { useShowShortcutBadges } from "@/hooks/use-show-shortcut-badges";
+import { useAppSettings } from "@/hooks/use-settings";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -1542,6 +1543,7 @@ function WorkspaceRow({
 
 function ProjectBlock({
   project,
+  visibleWorkspacesPerProject,
   workspaceEntriesByKey,
   collapsed,
   displayName,
@@ -1567,6 +1569,7 @@ function ProjectBlock({
   onToggleWorkspacePin,
 }: {
   project: SidebarProjectEntry;
+  visibleWorkspacesPerProject: number;
   workspaceEntriesByKey: ReadonlyMap<string, SidebarWorkspaceEntry>;
   collapsed: boolean;
   displayName: string;
@@ -1596,7 +1599,7 @@ function ProjectBlock({
     expanded: workspacesExpanded,
     canToggle: canToggleWorkspaces,
     toggleExpanded: toggleWorkspacesExpanded,
-  } = useLimitedSidebarGroup(project.workspaces);
+  } = useLimitedSidebarGroup(project.workspaces, visibleWorkspacesPerProject);
   const rowModel = useMemo(
     () =>
       buildSidebarProjectRowModel({
@@ -1827,6 +1830,7 @@ type ProjectBlockProps = Parameters<typeof ProjectBlock>[0];
 function areProjectBlockPropsEqual(previous: ProjectBlockProps, next: ProjectBlockProps): boolean {
   return (
     previous.project === next.project &&
+    previous.visibleWorkspacesPerProject === next.visibleWorkspacesPerProject &&
     previous.workspaceEntriesByKey === next.workspaceEntriesByKey &&
     previous.collapsed === next.collapsed &&
     previous.displayName === next.displayName &&
@@ -1906,6 +1910,8 @@ export function SidebarWorkspaceList({
   const pathname = usePathname();
   const hosts = useHosts();
   const rowItems = useSidebarRowItems();
+  const { settings } = useAppSettings();
+  const visibleWorkspacesPerProject = settings.sidebarVisibleWorkspacesPerProject;
   // Host badge visibility is a lattice, not three competing switches: this gate is the global
   // "off", `shouldShowSidebarHostLabels` is the automatic "there is only one host so it says
   // nothing", and each host's own `badgeDisplay` decides name vs icon vs hidden. Turning the
@@ -2004,6 +2010,7 @@ export function SidebarWorkspaceList({
         supportsPinningByServerId={supportsPinningByServerId}
         onToggleWorkspacePin={onToggleWorkspacePin}
         onPinnedWorkspaceReorder={handlePinnedWorkspaceReorder}
+        visibleWorkspacesPerProject={visibleWorkspacesPerProject}
       />
     );
 
@@ -2100,6 +2107,7 @@ function ProjectModeList({
   supportsPinningByServerId,
   onToggleWorkspacePin,
   onPinnedWorkspaceReorder,
+  visibleWorkspacesPerProject,
 }: Omit<
   SidebarWorkspaceListProps,
   | "workspaceGroups"
@@ -2118,6 +2126,7 @@ function ProjectModeList({
   supportsPinningByServerId: ReadonlyMap<string, boolean>;
   onToggleWorkspacePin: ToggleSidebarWorkspacePin;
   onPinnedWorkspaceReorder: (workspaces: SidebarWorkspacePlacement[]) => void;
+  visibleWorkspacesPerProject: number;
 }) {
   const hasActiveHostFilter = useSidebarViewStore((state) => state.hostFilters.length > 0);
   const [creatingWorkspaceIds, setCreatingWorkspaceIds] = useState<Set<string>>(() => new Set());
@@ -2294,6 +2303,7 @@ function ProjectModeList({
         <MemoProjectBlock
           key={item.viewKey}
           project={item}
+          visibleWorkspacesPerProject={visibleWorkspacesPerProject}
           workspaceEntriesByKey={workspaceEntriesByKey}
           collapsed={collapsedProjectKeys.has(item.viewKey)}
           displayName={item.projectName}
@@ -2339,6 +2349,7 @@ function ProjectModeList({
       showShortcutBadges,
       workspaceEntriesByKey,
       creatingWorkspaceIds,
+      visibleWorkspacesPerProject,
     ],
   );
 

@@ -2173,6 +2173,8 @@ export const ko: TranslationResources = {
         description: "사이드바 상단에 표시할 항목과 순서를 선택하세요",
         moveUp: "위로 이동",
         moveDown: "아래로 이동",
+        visibleWorkspacesLabel: "프로젝트당 워크스페이스 수",
+        visibleWorkspacesHint: "더 보기를 누르기 전에 각 프로젝트에 표시할 워크스페이스 수",
       },
       fonts: {
         title: "글꼴",
