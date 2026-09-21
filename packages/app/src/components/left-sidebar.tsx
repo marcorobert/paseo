@@ -48,6 +48,7 @@ import { useOwnsWindowChromeCorner, WindowChromeSafeArea } from "@/utils/desktop
 import { useCloseAgentListGesture } from "@/mobile-panels/gestures";
 import { MobilePanelOverlay } from "@/mobile-panels/presentation";
 import { buildSettingsAddHostRoute, buildSettingsRoute } from "@/utils/host-routes";
+import { APP_BUILD_VARIANT } from "@/utils/app-version";
 import { openHostOverview } from "@/navigation/settings-navigation";
 import { SidebarAgentListSkeleton } from "./sidebar-agent-list-skeleton";
 import { SidebarCalloutSlot } from "./sidebar-callout-slot";
@@ -55,7 +56,12 @@ import { SidebarWorkspaceList } from "./sidebar-workspace-list";
 
 type SidebarTheme = ReturnType<typeof useUnistyles>["theme"];
 
-const DEV_BUILD_LABEL = process.env.EXPO_PUBLIC_PASEO_DEV_BUILD_LABEL?.trim() || null;
+const BUILD_LABEL = [
+  process.env.EXPO_PUBLIC_PASEO_DEV_BUILD_LABEL?.trim() || null,
+  APP_BUILD_VARIANT,
+]
+  .filter(Boolean)
+  .join(" · ");
 
 interface SidebarSharedProps {
   theme: SidebarTheme;
@@ -731,19 +737,19 @@ function DesktopSidebar({
     >
       <View style={desktopSidebarBorderStyle}>
         <View style={styles.sidebarDragArea}>
-          {ownsTopLeft || DEV_BUILD_LABEL ? (
+          {ownsTopLeft || BUILD_LABEL ? (
             <View style={styles.desktopChromeRow}>
               <TitlebarDragRegion />
-              {DEV_BUILD_LABEL ? (
+              {BUILD_LABEL ? (
                 <View
                   pointerEvents="none"
                   style={styles.devBuildBadge}
                   testID="dev-build-label"
-                  accessibilityLabel={`Development build: ${DEV_BUILD_LABEL}`}
+                  accessibilityLabel={`Build variant: ${BUILD_LABEL}`}
                 >
                   <GitBranch size={12} color={theme.colors.accentForeground} />
                   <Text numberOfLines={1} ellipsizeMode="tail" style={styles.devBuildBadgeText}>
-                    {DEV_BUILD_LABEL}
+                    {BUILD_LABEL}
                   </Text>
                 </View>
               ) : null}

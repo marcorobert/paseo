@@ -23,7 +23,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { ICON_SIZE, type Theme } from "@/styles/theme";
 import type { HostProfile } from "@/types/host-connection";
 import { formatVersionWithPrefix } from "@/desktop/updates/desktop-updates";
-import { resolveAppVersion } from "@/utils/app-version";
+import { resolveAppVersionLabel } from "@/utils/app-version";
 import { openChangelog } from "@/changelog";
 import { openExternalUrl } from "@/utils/open-external-url";
 
@@ -82,7 +82,7 @@ export function SidebarHelpMenu() {
   const openAppDiagnostic = useAppDiagnosticStore((state) => state.open);
   const setShortcutsDialogOpen = useKeyboardShortcutsStore((state) => state.setShortcutsDialogOpen);
   const [open, setOpen] = useState(false);
-  const version = formatVersionWithPrefix(resolveAppVersion());
+  const version = formatVersionWithPrefix(resolveAppVersionLabel());
   const hosts = useHosts();
 
   const openKeyboardShortcuts = useCallback(() => {
