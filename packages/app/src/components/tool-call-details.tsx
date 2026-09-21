@@ -1,8 +1,10 @@
-import React, { useMemo, type ReactNode } from "react";
+import React, { useCallback, useMemo, useRef, type ReactNode } from "react";
 import {
   View,
   Text,
   ScrollView as RNScrollView,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
@@ -27,6 +29,16 @@ import { getCodeInsets } from "./code-insets";
 import { isWeb } from "@/constants/platform";
 
 const ScrollView = isWeb ? RNScrollView : GHScrollView;
+const AUTO_SCROLL_BOTTOM_THRESHOLD_PX = 64;
+
+function isScrollNearBottom(event: NativeSyntheticEvent<NativeScrollEvent>): boolean {
+  const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+  if (![contentOffset.y, contentSize.height, layoutMeasurement.height].every(Number.isFinite)) {
+    return true;
+  }
+  const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
+  return distanceFromBottom <= AUTO_SCROLL_BOTTOM_THRESHOLD_PX;
+}
 
 // ---- Content Component ----
 
@@ -494,14 +506,41 @@ function FetchDetailSection({ url, result, ds }: FetchDetailProps) {
   );
 }
 
-function ScrollablePlainTextSection({ text, ds }: { text: string; ds: DetailStyles }) {
+interface ScrollablePlainTextSectionProps {
+  text: string;
+  ds: DetailStyles;
+  autoScrollToEnd?: boolean;
+}
+
+function ScrollablePlainTextSection({
+  text,
+  ds,
+  autoScrollToEnd = false,
+}: ScrollablePlainTextSectionProps) {
+  const scrollRef = useRef<RNScrollView>(null);
+  const followOutputRef = useRef(true);
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    followOutputRef.current = isScrollNearBottom(event);
+  }, []);
+  const scrollToLatest = useCallback(() => {
+    if (!followOutputRef.current) {
+      return;
+    }
+    scrollRef.current?.scrollToEnd({ animated: false });
+  }, []);
+
   return (
     <View style={styles.section}>
       <ScrollView
+        ref={scrollRef}
         style={ds.scrollAreaStyle}
         contentContainerStyle={styles.scrollContent}
         nestedScrollEnabled
         showsVerticalScrollIndicator
+        onContentSizeChange={autoScrollToEnd ? scrollToLatest : undefined}
+        onScroll={autoScrollToEnd ? handleScroll : undefined}
+        scrollEventThrottle={autoScrollToEnd ? 16 : undefined}
+        testID={autoScrollToEnd ? "thinking-scroll" : undefined}
       >
         <Text selectable style={styles.plainText}>
           {text}
@@ -582,12 +621,24 @@ interface UnknownDetail {
   output: unknown;
 }
 
-function buildUnknownSections(detail: UnknownDetail, ds: DetailStyles, t: TFunction): ReactNode[] {
+function buildUnknownSections(
+  detail: UnknownDetail,
+  ds: DetailStyles,
+  t: TFunction,
+  autoScrollToEnd: boolean,
+): ReactNode[] {
   const plainInputText =
     typeof detail.input === "string" && detail.output === null ? detail.input : null;
 
   if (plainInputText !== null) {
-    return [<ScrollablePlainTextSection key="unknown-plain-text" text={plainInputText} ds={ds} />];
+    return [
+      <ScrollablePlainTextSection
+        key="unknown-plain-text"
+        text={plainInputText}
+        ds={ds}
+        autoScrollToEnd={autoScrollToEnd}
+      />,
+    ];
   }
 
   const sectionsFromTopLevel = [
@@ -671,6 +722,7 @@ function buildDetailSections(
   diffLines: DiffLine[] | undefined,
   ds: DetailStyles,
   t: TFunction,
+  autoScrollToEnd: boolean,
 ): ReactNode[] {
   if (!detail) return [];
   if (detail.type === "shell") {
@@ -738,10 +790,20 @@ function buildDetailSections(
   }
   if (detail.type === "plain_text") {
     if (!detail.text) return [];
-    return [<ScrollablePlainTextSection key="plain-text" text={detail.text} ds={ds} />];
+    return [
+      <ScrollablePlainTextSection
+        key="plain-text"
+        text={detail.text}
+        ds={ds}
+        autoScrollToEnd={autoScrollToEnd}
+      />,
+    ];
   }
   if (detail.type === "unknown") {
-    return buildPaseoUnknownSections(toolName, detail) ?? buildUnknownSections(detail, ds, t);
+    return (
+      buildPaseoUnknownSections(toolName, detail) ??
+      buildUnknownSections(detail, ds, t, autoScrollToEnd)
+    );
   }
   return [];
 }
@@ -792,8 +854,16 @@ export function ToolCallDetailsContent({
   const resolvedMaxHeight = fillAvailableHeight ? undefined : (maxHeight ?? 300);
   const ds = useDetailStyles(detail, resolvedMaxHeight, fillAvailableHeight);
   const diffLines = useDiffLines(detail);
+  const autoScrollToEnd = toolName === "thinking";
 
-  const sections: ReactNode[] = buildDetailSections(toolName, detail, diffLines, ds, t);
+  const sections: ReactNode[] = buildDetailSections(
+    toolName,
+    detail,
+    diffLines,
+    ds,
+    t,
+    autoScrollToEnd,
+  );
 
   if (errorText) {
     sections.push(<ErrorSection key="error" errorText={errorText} ds={ds} />);
