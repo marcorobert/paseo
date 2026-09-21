@@ -168,6 +168,8 @@ describe("projectTimelineRows", () => {
     if (tool?.item.type === "tool_call") {
       expect(tool.item.status).toBe("completed");
       expect(tool.item.callId).toBe("call_1");
+      expect(tool.item.startedAt).toBe("2026-02-13T00:00:00.000Z");
+      expect(tool.item.completedAt).toBe("2026-02-13T00:00:00.200Z");
     }
     expect(tool?.sourceSeqRanges).toEqual([
       { startSeq: 1, endSeq: 1 },

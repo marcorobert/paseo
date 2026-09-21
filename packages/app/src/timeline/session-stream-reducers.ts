@@ -243,6 +243,7 @@ function reconcilePromptWindowItems(input: {
                 item.payload.data,
                 item.timestamp,
                 item.timelineCursor,
+                { startedAt: item.startedAt, completedAt: item.completedAt },
               )
             : { ...item, id: existing.id };
         if (tailIndex >= 0) tail = next;
@@ -724,7 +725,13 @@ function mergeTimelineIdentityBoundary(
   if (!isAgentToolCallItem(olderLast) || !isAgentToolCallItem(currentFirst)) return null;
   return [
     ...olderTail.slice(0, -1),
-    mergeAgentToolCallItem(olderLast, currentFirst.payload.data, currentFirst.timestamp),
+    mergeAgentToolCallItem(
+      olderLast,
+      currentFirst.payload.data,
+      currentFirst.timestamp,
+      undefined,
+      { startedAt: currentFirst.startedAt, completedAt: currentFirst.completedAt },
+    ),
     ...currentTail.slice(1),
   ];
 }

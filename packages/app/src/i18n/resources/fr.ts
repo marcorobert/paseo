@@ -2209,6 +2209,10 @@ export const fr: TranslationResources = {
       detailLevel: {
         title: "Niveau de détail",
       },
+      timingMetadata: {
+        title: "Afficher les durées des réponses et outils",
+        description: "Afficher le temps écoulé pendant la génération et à la fin",
+      },
       chatOutline: {
         title: "Plan de la discussion",
         description: "Afficher un plan pour passer d’une requête à l’autre",

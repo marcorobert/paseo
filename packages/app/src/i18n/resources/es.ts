@@ -2205,6 +2205,10 @@ export const es: TranslationResources = {
       detailLevel: {
         title: "Nivel de detalle",
       },
+      timingMetadata: {
+        title: "Mostrar tiempos de respuestas y herramientas",
+        description: "Mostrar el tiempo transcurrido durante la generación y al finalizar",
+      },
       chatOutline: {
         title: "Esquema del chat",
         description: "Muestra un esquema para saltar entre instrucciones",

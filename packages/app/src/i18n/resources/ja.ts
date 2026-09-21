@@ -2172,6 +2172,10 @@ export const ja: TranslationResources = {
       detailLevel: {
         title: "詳細レベル",
       },
+      timingMetadata: {
+        title: "応答とツールの時間を表示",
+        description: "生成中と応答・ツールの完了後に経過時間を表示します",
+      },
       chatOutline: {
         title: "チャットのアウトライン",
         description: "プロンプト間を移動するためのアウトラインを表示します",

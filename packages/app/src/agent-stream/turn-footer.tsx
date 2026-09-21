@@ -45,6 +45,7 @@ export type InFlightTurnForkHandler = (target: AssistantForkTarget) => Promise<v
 export const TurnFooter = memo(function TurnFooter({
   isRunning,
   inFlightTurnStartedAt,
+  showTimingMetadata,
   host,
   strategy,
   supportsTimelineCursor,
@@ -53,6 +54,7 @@ export const TurnFooter = memo(function TurnFooter({
 }: {
   isRunning: boolean;
   inFlightTurnStartedAt: Date | null;
+  showTimingMetadata: boolean;
   host: TurnFooterHost | null;
   strategy: TurnContentStrategy;
   supportsTimelineCursor: boolean;
@@ -64,6 +66,7 @@ export const TurnFooter = memo(function TurnFooter({
       <TurnFooterRow>
         <RunningTurnFooter
           inFlightTurnStartedAt={inFlightTurnStartedAt}
+          showTimingMetadata={showTimingMetadata}
           onForkInFlightTurn={onForkInFlightTurn}
         />
       </TurnFooterRow>
@@ -77,6 +80,7 @@ export const TurnFooter = memo(function TurnFooter({
       strategy={strategy}
       items={host.items}
       timing={host.timing}
+      showTimingMetadata={showTimingMetadata}
       startIndex={host.startIndex}
       supportsTimelineCursor={supportsTimelineCursor}
       onForkAssistantTurn={onForkAssistantTurn}
@@ -88,6 +92,7 @@ export const CompletedTurnFooterRow = memo(function CompletedTurnFooterRow({
   strategy,
   items,
   timing,
+  showTimingMetadata,
   startIndex,
   supportsTimelineCursor,
   onForkAssistantTurn,
@@ -95,6 +100,7 @@ export const CompletedTurnFooterRow = memo(function CompletedTurnFooterRow({
   strategy: TurnContentStrategy;
   items: StreamItem[];
   timing?: TurnTiming;
+  showTimingMetadata: boolean;
   startIndex: number;
   supportsTimelineCursor: boolean;
   onForkAssistantTurn?: AssistantTurnForkHandler;
@@ -105,6 +111,7 @@ export const CompletedTurnFooterRow = memo(function CompletedTurnFooterRow({
         strategy={strategy}
         items={items}
         timing={timing}
+        showTimingMetadata={showTimingMetadata}
         startIndex={startIndex}
         supportsTimelineCursor={supportsTimelineCursor}
         onForkAssistantTurn={onForkAssistantTurn}
@@ -115,9 +122,11 @@ export const CompletedTurnFooterRow = memo(function CompletedTurnFooterRow({
 
 const WorkingIndicator = memo(function WorkingIndicator({
   inFlightTurnStartedAt = null,
+  showTimingMetadata,
   onForkInFlightTurn,
 }: {
   inFlightTurnStartedAt?: Date | null;
+  showTimingMetadata: boolean;
   onForkInFlightTurn?: InFlightTurnForkHandler;
 }) {
   const active = useRetainedPanelActive();
@@ -128,7 +137,7 @@ const WorkingIndicator = memo(function WorkingIndicator({
       </View>
       {/* Match the completed-turn footer: actions precede timing metadata. */}
       {onForkInFlightTurn ? <AssistantForkMenu onFork={onForkInFlightTurn} /> : null}
-      {inFlightTurnStartedAt ? (
+      {showTimingMetadata && inFlightTurnStartedAt ? (
         <LiveElapsed
           startedAt={inFlightTurnStartedAt}
           active={active}
@@ -142,15 +151,18 @@ const WorkingIndicator = memo(function WorkingIndicator({
 
 function RunningTurnFooter({
   inFlightTurnStartedAt,
+  showTimingMetadata,
   onForkInFlightTurn,
 }: {
   inFlightTurnStartedAt: Date | null;
+  showTimingMetadata: boolean;
   onForkInFlightTurn?: InFlightTurnForkHandler;
 }) {
   return (
     <View style={stylesheet.turnFooterSlot} testID="turn-working-indicator">
       <WorkingIndicator
         inFlightTurnStartedAt={inFlightTurnStartedAt}
+        showTimingMetadata={showTimingMetadata}
         onForkInFlightTurn={onForkInFlightTurn}
       />
     </View>
@@ -161,6 +173,7 @@ function CompletedTurnFooter({
   strategy,
   items,
   timing,
+  showTimingMetadata,
   startIndex,
   supportsTimelineCursor,
   onForkAssistantTurn,
@@ -168,6 +181,7 @@ function CompletedTurnFooter({
   strategy: TurnContentStrategy;
   items: StreamItem[];
   timing?: TurnTiming;
+  showTimingMetadata: boolean;
   startIndex: number;
   supportsTimelineCursor: boolean;
   onForkAssistantTurn?: AssistantTurnForkHandler;
@@ -201,6 +215,7 @@ function CompletedTurnFooter({
         getContent={getContent}
         completedAt={timing?.completedAt}
         durationMs={timing?.durationMs}
+        showTimingMetadata={showTimingMetadata}
         onFork={boundary && onForkAssistantTurn ? handleFork : undefined}
       />
     </View>

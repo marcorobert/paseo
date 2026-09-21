@@ -115,6 +115,30 @@ function mergeToolCallItems(
   return merged;
 }
 
+function addToolCallTiming(entry: WorkingEntry): WorkingEntry {
+  if (entry.item.type !== "tool_call") {
+    return entry;
+  }
+
+  const startedAt =
+    entry.item.startedAt ?? (entry.item.status === "running" ? entry.timestamp : undefined);
+  const completedAt =
+    entry.item.completedAt ?? (entry.item.status !== "running" ? entry.timestamp : undefined);
+
+  if (startedAt === entry.item.startedAt && completedAt === entry.item.completedAt) {
+    return entry;
+  }
+
+  return {
+    ...entry,
+    item: {
+      ...entry.item,
+      ...(startedAt ? { startedAt } : {}),
+      ...(completedAt ? { completedAt } : {}),
+    },
+  };
+}
+
 function makeCanonicalEntries(rows: readonly AgentTimelineRow[]): WorkingEntry[] {
   return rows.map((row) => {
     if ("seqStart" in row) return { ...(row as ProjectedTimelineRow) };
@@ -148,13 +172,28 @@ function mergeIdentityEntries(existing: WorkingEntry, entry: WorkingEntry): Work
   switch (entry.item.type) {
     case "tool_call":
       if (existing.item.type !== "tool_call" || existing.turnId !== entry.turnId) return null;
-      return {
-        ...existing,
-        item: mergeToolCallItems(existing.item, entry.item),
-        timestamp: entry.timestamp,
-        seqEnd: Math.max(existing.seqEnd, entry.seqEnd),
-        ...mergeIdentityMetadata(existing, entry, "tool_lifecycle"),
-      };
+      {
+        const mergedItem = mergeToolCallItems(existing.item, entry.item);
+        const startedAt =
+          existing.item.startedAt ??
+          entry.item.startedAt ??
+          (existing.item.status === "running" ? existing.timestamp : undefined);
+        const completedAt =
+          existing.item.completedAt ??
+          entry.item.completedAt ??
+          (entry.item.status !== "running" ? entry.timestamp : undefined);
+        return {
+          ...existing,
+          item: {
+            ...mergedItem,
+            ...(startedAt ? { startedAt } : {}),
+            ...(completedAt ? { completedAt } : {}),
+          },
+          timestamp: entry.timestamp,
+          seqEnd: Math.max(existing.seqEnd, entry.seqEnd),
+          ...mergeIdentityMetadata(existing, entry, "tool_lifecycle"),
+        };
+      }
     case "plugin":
       if (existing.item.type !== "plugin") return null;
       return {
@@ -181,7 +220,7 @@ function collapseByIdentity(entries: readonly WorkingEntry[]): WorkingEntry[] {
     const existingIndex = indexByIdentity.get(identity);
     if (existingIndex === undefined) {
       indexByIdentity.set(identity, output.length);
-      output.push(entry);
+      output.push(addToolCallTiming(entry));
       continue;
     }
 
@@ -189,7 +228,7 @@ function collapseByIdentity(entries: readonly WorkingEntry[]): WorkingEntry[] {
     const merged = existing ? mergeIdentityEntries(existing, entry) : null;
     if (!merged) {
       indexByIdentity.set(identity, output.length);
-      output.push(entry);
+      output.push(addToolCallTiming(entry));
       continue;
     }
     output[existingIndex] = merged;
@@ -300,7 +339,9 @@ export class TimelineProjection {
   private readonly identities = new Map<string, number>();
 
   append(row: AgentTimelineRow): void {
-    const entry = makeCanonicalEntries([row])[0];
+    const canonicalEntry = makeCanonicalEntries([row])[0];
+    const entry = canonicalEntry ? addToolCallTiming(canonicalEntry) : undefined;
+    if (!entry) return;
     const identity = timelineItemIdentity(row.item);
     const index = identity === null ? undefined : this.identities.get(identity);
     const existing = index === undefined ? undefined : this.rows[index];

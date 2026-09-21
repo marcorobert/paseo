@@ -2153,6 +2153,10 @@ export const ar: TranslationResources = {
       detailLevel: {
         title: "مستوى التفاصيل",
       },
+      timingMetadata: {
+        title: "إظهار أوقات الاستجابة واستدعاءات الأدوات",
+        description: "عرض الوقت المنقضي أثناء الإنشاء وبعد اكتمال الاستجابات والأدوات",
+      },
       chatOutline: {
         title: "مخطط المحادثة",
         description: "عرض مخطط للتنقل بين المطالبات",

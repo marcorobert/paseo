@@ -2188,6 +2188,10 @@ export const ptBR: TranslationResources = {
       detailLevel: {
         title: "Nível de detalhe",
       },
+      timingMetadata: {
+        title: "Mostrar tempos de respostas e ferramentas",
+        description: "Mostrar o tempo decorrido durante a geração e após a conclusão",
+      },
       chatOutline: {
         title: "Estrutura do chat",
         description: "Mostrar uma estrutura para navegar entre prompts",

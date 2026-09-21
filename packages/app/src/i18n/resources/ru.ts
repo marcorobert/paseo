@@ -2191,6 +2191,10 @@ export const ru: TranslationResources = {
       detailLevel: {
         title: "Уровень детализации",
       },
+      timingMetadata: {
+        title: "Показывать время ответов и инструментов",
+        description: "Показывать прошедшее время во время генерации и после завершения",
+      },
       chatOutline: {
         title: "Оглавление чата",
         description: "Показывать оглавление для перехода между запросами",

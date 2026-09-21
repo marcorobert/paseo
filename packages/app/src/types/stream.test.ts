@@ -691,6 +691,8 @@ describe("stream reducer canonical tool calls", () => {
       expect.objectContaining({
         id: `agent_tool_turn:${turnId}/${callId}`,
         turnId,
+        startedAt: new Date("2025-01-01T09:00:00Z"),
+        completedAt: new Date("2025-01-01T09:01:00Z"),
         payload: expect.objectContaining({
           data: expect.objectContaining({ callId, status: "completed" }),
         }),

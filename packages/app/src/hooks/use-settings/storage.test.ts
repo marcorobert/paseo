@@ -200,6 +200,24 @@ describe("loadAppSettingsFromStorage", () => {
     expect(result.chatOutlineEnabled).toBe(false);
   });
 
+  it("disables timing metadata by default", async () => {
+    const result = await loadAppSettingsFromStorage(makeDeps());
+
+    expect(result.showTimingMetadata).toBe(false);
+  });
+
+  it("loads an enabled timing metadata preference", async () => {
+    const deps = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ showTimingMetadata: true }),
+      }),
+    });
+
+    const result = await loadAppSettingsFromStorage(deps);
+
+    expect(result.showTimingMetadata).toBe(true);
+  });
+
   it("defaults sidebar navigation items to an empty preference list", async () => {
     const deps = makeDeps();
 

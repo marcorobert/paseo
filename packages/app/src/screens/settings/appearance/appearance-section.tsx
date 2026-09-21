@@ -260,6 +260,23 @@ function ChatOutlineRow({ value, onChange }: ChatOutlineRowProps) {
   );
 }
 
+interface TimingMetadataRowProps {
+  value: boolean;
+  onChange: (value: boolean) => void;
+}
+
+function TimingMetadataRow({ value, onChange }: TimingMetadataRowProps) {
+  const { t } = useTranslation();
+  return (
+    <SettingsSwitch
+      label={t("settings.appearance.timingMetadata.title")}
+      hint={t("settings.appearance.timingMetadata.description")}
+      value={value}
+      onValueChange={onChange}
+    />
+  );
+}
+
 const TOOL_CALL_DETAIL_LEVELS: readonly AppSettings["toolCallDetailLevel"][] = [
   "detailed",
   "overview",
@@ -577,6 +594,13 @@ export function AppearanceSection() {
     [updateSettings],
   );
 
+  const handleTimingMetadataChange = useCallback(
+    (showTimingMetadata: boolean) => {
+      void updateSettings({ showTimingMetadata });
+    },
+    [updateSettings],
+  );
+
   const commitUiFontFamily = useCallback(
     (value: string) => {
       const sanitized = sanitizeFontFamily(value);
@@ -689,6 +713,10 @@ export function AppearanceSection() {
           <ToolCallDetailRow
             value={settings.toolCallDetailLevel}
             onChange={handleToolCallDetailLevelChange}
+          />
+          <TimingMetadataRow
+            value={settings.showTimingMetadata}
+            onChange={handleTimingMetadataChange}
           />
           {!isNative ? (
             <ChatOutlineRow

@@ -2164,6 +2164,10 @@ export const ko: TranslationResources = {
       detailLevel: {
         title: "세부 수준",
       },
+      timingMetadata: {
+        title: "응답 및 도구 시간 표시",
+        description: "생성 중과 응답 및 도구 완료 후 경과 시간을 표시합니다",
+      },
       chatOutline: {
         title: "채팅 개요",
         description: "프롬프트 사이를 이동하기 위한 개요 표시",

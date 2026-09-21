@@ -46,6 +46,21 @@ describe("shared messages tool_call schema", () => {
     expect(canceled.type).toBe("tool_call");
   });
 
+  it("preserves optional lifecycle timestamps", () => {
+    const parsed = AgentTimelineItemPayloadSchema.parse({
+      ...canonicalBase(),
+      status: "completed",
+      error: null,
+      startedAt: "2026-07-31T12:00:00.000Z",
+      completedAt: "2026-07-31T12:00:03.000Z",
+    });
+
+    expect(parsed).toMatchObject({
+      startedAt: "2026-07-31T12:00:00.000Z",
+      completedAt: "2026-07-31T12:00:03.000Z",
+    });
+  });
+
   it("rejects non-recoverable invalid tool_call payloads", () => {
     const missingCallId = AgentTimelineItemPayloadSchema.safeParse({
       type: "tool_call",

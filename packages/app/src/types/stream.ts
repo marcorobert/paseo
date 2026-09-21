@@ -463,6 +463,7 @@ function mergeRetainedLifecycleItem(tail: StreamItem[], retained: StreamItem): S
       retained.payload.data,
       retained.timestamp,
       retained.timelineCursor,
+      { startedAt: retained.startedAt, completedAt: retained.completedAt },
     );
     return next;
   }
@@ -764,6 +765,10 @@ export interface ToolCallItem {
   timelineCursor?: TimelinePosition;
   turnId?: string;
   timestamp: Date;
+  /** First lifecycle timestamp, retained separately from the latest event timestamp. */
+  startedAt?: Date;
+  /** Terminal lifecycle timestamp, when the call has finished. */
+  completedAt?: Date;
   payload: ToolCallPayload;
 }
 
@@ -1092,6 +1097,47 @@ function mergeToolCallMetadata(
   return { ...existing, ...incoming };
 }
 
+function parseOptionalTimelineDate(value: string | undefined): Date | undefined {
+  if (!value) return undefined;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
+function resolveInitialToolCallTiming(input: {
+  status: AgentToolCallStatus;
+  timestamp: Date;
+  startedAt?: Date;
+  completedAt?: Date;
+}): Pick<ToolCallItem, "startedAt" | "completedAt"> {
+  const timing: Pick<ToolCallItem, "startedAt" | "completedAt"> = {};
+  if (input.startedAt) {
+    timing.startedAt = input.startedAt;
+  } else if (input.status === "running") {
+    timing.startedAt = input.timestamp;
+  }
+  if (input.completedAt) {
+    timing.completedAt = input.completedAt;
+  } else if (input.status !== "running") {
+    timing.completedAt = input.timestamp;
+  }
+  return timing;
+}
+
+function areAgentToolCallItemsEqual(left: AgentToolCallItem, right: AgentToolCallItem): boolean {
+  return (
+    left.payload.data.provider === right.payload.data.provider &&
+    left.payload.data.callId === right.payload.data.callId &&
+    left.payload.data.name === right.payload.data.name &&
+    left.payload.data.status === right.payload.data.status &&
+    left.payload.data.error === right.payload.data.error &&
+    left.payload.data.detail === right.payload.data.detail &&
+    left.payload.data.metadata === right.payload.data.metadata &&
+    left.startedAt?.getTime() === right.startedAt?.getTime() &&
+    left.completedAt?.getTime() === right.completedAt?.getTime() &&
+    left.timelineCursor === right.timelineCursor
+  );
+}
+
 export function mergeToolCallDetail(
   existing: ToolCallDetail,
   incoming: ToolCallDetail,
@@ -1157,6 +1203,7 @@ export function mergeAgentToolCallItem(
   data: AgentToolCallData,
   timestamp: Date,
   timelineCursor?: TimelinePosition,
+  timing?: { startedAt?: Date; completedAt?: Date },
 ): AgentToolCallItem {
   const mergedStatus = mergeAgentToolCallStatus(existing.payload.data.status, data.status);
   const mergedError =
@@ -1165,11 +1212,21 @@ export function mergeAgentToolCallItem(
       : null;
   const mergedMetadata = mergeToolCallMetadata(existing.payload.data.metadata, data.metadata);
   const mergedDetail = mergeToolCallDetail(existing.payload.data.detail, data.detail);
+  const startedAt =
+    existing.startedAt ??
+    timing?.startedAt ??
+    (existing.payload.data.status === "running" ? existing.timestamp : undefined);
+  const completedAt =
+    existing.completedAt ??
+    timing?.completedAt ??
+    (data.status !== "running" ? timestamp : undefined);
 
   return {
     ...existing,
     ...(timelineCursor ? { timelineCursor } : {}),
     timestamp,
+    ...(startedAt ? { startedAt } : {}),
+    ...(completedAt ? { completedAt } : {}),
     payload: {
       source: "agent",
       data: {
@@ -1190,10 +1247,12 @@ interface AppendAgentToolCallInput {
   timestamp: Date;
   turnId?: string;
   timelineCursor?: TimelinePosition;
+  startedAt?: Date;
+  completedAt?: Date;
 }
 
 function appendAgentToolCall(input: AppendAgentToolCallInput): StreamItem[] {
-  const { state, data, timestamp, turnId, timelineCursor } = input;
+  const { state, data, timestamp, turnId, timelineCursor, startedAt, completedAt } = input;
   const identity = agentToolCallIdentity({ callId: data.callId, turnId });
   const existingIndex = findExistingTimelineIdentityIndex(state, identity);
 
@@ -1202,18 +1261,12 @@ function appendAgentToolCall(input: AppendAgentToolCallInput): StreamItem[] {
     if (!existing || !isAgentToolCallItem(existing)) {
       return state;
     }
-    const merged = mergeAgentToolCallItem(existing, data, timestamp, timelineCursor);
+    const merged = mergeAgentToolCallItem(existing, data, timestamp, timelineCursor, {
+      startedAt,
+      completedAt,
+    });
 
-    if (
-      merged.payload.data.provider === existing.payload.data.provider &&
-      merged.payload.data.callId === existing.payload.data.callId &&
-      merged.payload.data.name === existing.payload.data.name &&
-      merged.payload.data.status === existing.payload.data.status &&
-      merged.payload.data.error === existing.payload.data.error &&
-      merged.payload.data.detail === existing.payload.data.detail &&
-      merged.payload.data.metadata === existing.payload.data.metadata &&
-      merged.timelineCursor === existing.timelineCursor
-    ) {
+    if (areAgentToolCallItemsEqual(merged, existing)) {
       return state;
     }
 
@@ -1222,12 +1275,19 @@ function appendAgentToolCall(input: AppendAgentToolCallInput): StreamItem[] {
     return next;
   }
 
+  const timing = resolveInitialToolCallTiming({
+    status: data.status,
+    timestamp,
+    startedAt,
+    completedAt,
+  });
   const item: ToolCallItem = {
     kind: "tool_call",
     id: `agent_tool_${identity}`,
     ...(timelineCursor ? { timelineCursor } : {}),
     ...(turnId ? { turnId } : {}),
     timestamp,
+    ...timing,
     payload: {
       source: "agent",
       data: {
@@ -1448,6 +1508,8 @@ function reduceTimelineToolCall(
       metadata: item.metadata,
     },
     timestamp,
+    startedAt: parseOptionalTimelineDate(item.startedAt),
+    completedAt: parseOptionalTimelineDate(item.completedAt),
     timelineCursor,
     turnId: event.turnId,
   });

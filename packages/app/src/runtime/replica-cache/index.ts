@@ -18,6 +18,7 @@ import {
   isUnreconciledLocalUserMessage,
   type AgentToolCallData,
   type StreamItem,
+  type ToolCallItem,
 } from "@/types/stream";
 import { normalizeAgentSnapshot } from "@/utils/agent-snapshots";
 import { clearLegacyReplicaCache } from "./legacy-cleanup";
@@ -399,12 +400,17 @@ function timelineBase(item: StreamItem) {
   };
 }
 
-function serializeAgentToolCall(data: AgentToolCallData): StoredToolCall {
+function serializeAgentToolCall(
+  data: AgentToolCallData,
+  timing: Pick<ToolCallItem, "startedAt" | "completedAt">,
+): StoredToolCall {
   const base = {
     type: "tool_call" as const,
     callId: data.callId,
     name: data.name,
     detail: data.detail,
+    ...(timing.startedAt ? { startedAt: timing.startedAt.toISOString() } : {}),
+    ...(timing.completedAt ? { completedAt: timing.completedAt.toISOString() } : {}),
     ...(data.metadata ? { metadata: data.metadata } : {}),
   };
   switch (data.status) {
@@ -467,7 +473,7 @@ function serializeTimelineItem(item: StreamItem): StoredTimelineItem | null {
         ...base,
         kind: item.kind,
         provider: item.payload.data.provider,
-        item: serializeAgentToolCall(item.payload.data),
+        item: serializeAgentToolCall(item.payload.data, item),
       };
     case "plugin":
       return {
@@ -559,6 +565,8 @@ function deserializeBuiltinTimelineItem(
       return {
         ...base,
         kind: item.kind,
+        ...(tool.startedAt ? { startedAt: new Date(tool.startedAt) } : {}),
+        ...(tool.completedAt ? { completedAt: new Date(tool.completedAt) } : {}),
         payload: {
           source: "agent",
           data: {

@@ -581,6 +581,7 @@ interface AssistantTurnFooterProps {
   getContent: () => string;
   completedAt?: Date;
   durationMs?: number | null;
+  showTimingMetadata: boolean;
   onFork?: (target: AssistantForkTarget) => Promise<void> | void;
 }
 
@@ -625,6 +626,7 @@ export const AssistantTurnFooter = memo(function AssistantTurnFooter({
   getContent,
   completedAt,
   durationMs,
+  showTimingMetadata,
   onFork,
 }: AssistantTurnFooterProps) {
   const [hovered, setHovered] = useState(false);
@@ -642,14 +644,14 @@ export const AssistantTurnFooter = memo(function AssistantTurnFooter({
 
   const durationLabel = useMemo(
     () =>
-      durationMs !== undefined && durationMs !== null
+      showTimingMetadata && durationMs !== undefined && durationMs !== null
         ? `Worked for ${formatDuration(durationMs)}`
         : "",
-    [durationMs],
+    [durationMs, showTimingMetadata],
   );
   const timestampLabel = useMemo(
-    () => (completedAt ? formatMessageTimestamp(completedAt) : ""),
-    [completedAt],
+    () => (showTimingMetadata && completedAt ? formatMessageTimestamp(completedAt) : ""),
+    [completedAt, showTimingMetadata],
   );
 
   const primaryLabel = durationLabel || timestampLabel;
@@ -3028,6 +3030,9 @@ interface ToolCallProps {
   result?: unknown;
   error?: unknown;
   status: "executing" | "running" | "completed" | "failed" | "canceled";
+  startedAt?: Date;
+  completedAt?: Date;
+  showTimingMetadata?: boolean;
   detail?: ToolCallDetail;
   cwd?: string;
   metadata?: Record<string, unknown>;
@@ -3041,12 +3046,32 @@ interface ToolCallProps {
   maxDetailHeight?: number;
 }
 
+function appendToolCallTimingLabel(
+  summary: string | undefined,
+  timingLabel: string | undefined,
+): string | undefined {
+  if (!timingLabel) return summary;
+  if (!summary) return timingLabel;
+  return `${summary} · ${timingLabel}`;
+}
+
+function toolCallTimingPropsEqual(previous: ToolCallProps, next: ToolCallProps): boolean {
+  return (
+    previous.startedAt?.getTime() === next.startedAt?.getTime() &&
+    previous.completedAt?.getTime() === next.completedAt?.getTime() &&
+    previous.showTimingMetadata === next.showTimingMetadata
+  );
+}
+
 export const ToolCall = memo(function ToolCall({
   toolName,
   args,
   result,
   error,
   status,
+  startedAt,
+  completedAt,
+  showTimingMetadata = false,
   detail,
   cwd,
   metadata,
@@ -3064,6 +3089,25 @@ export const ToolCall = memo(function ToolCall({
 
   const isMobile = useIsCompactFormFactor();
   const shouldRenderInline = !isMobile || forceInline;
+  const isRunning = status === "running" || status === "executing";
+  const isPanelActive = useRetainedPanelActive();
+  const startedAtMs = startedAt?.getTime() ?? null;
+  const [timingNowMs, setTimingNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (
+      !showTimingMetadata ||
+      !isRunning ||
+      startedAtMs === null ||
+      !Number.isFinite(startedAtMs) ||
+      !isPanelActive
+    ) {
+      return;
+    }
+    setTimingNowMs(Date.now());
+    const interval = setInterval(() => setTimingNowMs(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [isPanelActive, isRunning, showTimingMetadata, startedAtMs]);
 
   const effectiveDetail = useMemo<ToolCallDetail | undefined>(() => {
     if (detail) {
@@ -3092,6 +3136,25 @@ export const ToolCall = memo(function ToolCall({
       }),
     [toolName, status, error, effectiveDetail, metadata, cwd],
   );
+  const timingLabel = useMemo(() => {
+    if (!showTimingMetadata || startedAtMs === null || !Number.isFinite(startedAtMs)) {
+      return undefined;
+    }
+    const endAtMs = isRunning ? timingNowMs : (completedAt?.getTime() ?? null);
+    if (endAtMs === null || !Number.isFinite(endAtMs)) {
+      return undefined;
+    }
+    const prefix = isRunning ? "Running for" : "Worked for";
+    return `${prefix} ${formatDuration(Math.max(0, endAtMs - startedAtMs))}`;
+  }, [completedAt, isRunning, showTimingMetadata, startedAtMs, timingNowMs]);
+  const summaryWithTiming = appendToolCallTimingLabel(presentation.summary, timingLabel);
+  const planTimingFooter = useMemo(
+    () =>
+      timingLabel ? (
+        <Text style={assistantTurnFooterStylesheet.labelOverlay}>{timingLabel}</Text>
+      ) : undefined,
+    [timingLabel],
+  );
   const handleOpenFile = useMemo(() => {
     const openFilePath = presentation.openFilePath;
     if (!openFilePath || !onOpenFilePath) {
@@ -3105,7 +3168,7 @@ export const ToolCall = memo(function ToolCall({
       openToolCall({
         toolName,
         displayName: presentation.displayName,
-        summary: presentation.summary,
+        summary: summaryWithTiming,
         detail: effectiveDetail,
         errorText: presentation.errorText,
         icon: presentation.icon,
@@ -3119,7 +3182,7 @@ export const ToolCall = memo(function ToolCall({
     openToolCall,
     toolName,
     presentation.displayName,
-    presentation.summary,
+    summaryWithTiming,
     presentation.errorText,
     presentation.icon,
     presentation.isLoadingDetails,
@@ -3179,6 +3242,7 @@ export const ToolCall = memo(function ToolCall({
       <PlanCard
         text={effectiveDetail.text}
         outcome={presentation.planOutcome}
+        footer={planTimingFooter}
         testID="timeline-plan-card"
         disableOuterSpacing={disableOuterSpacing}
       />
@@ -3189,13 +3253,13 @@ export const ToolCall = memo(function ToolCall({
     <ExpandableBadge
       testID="tool-call-badge"
       label={presentation.displayName}
-      secondaryLabel={presentation.summary}
+      secondaryLabel={summaryWithTiming}
       icon={presentation.icon}
       isExpanded={shouldRenderInline && isExpanded}
       onToggle={presentation.canOpenDetails ? handleToggle : undefined}
       onOpenFile={handleOpenFile}
       renderDetails={presentation.canOpenDetails && shouldRenderInline ? renderDetails : undefined}
-      isLoading={status === "running" || status === "executing"}
+      isLoading={isRunning}
       isError={status === "failed"}
       isLastInSequence={isLastInSequence}
       disableOuterSpacing={disableOuterSpacing}
@@ -3210,6 +3274,7 @@ function areToolCallPropsEqual(previous: ToolCallProps, next: ToolCallProps) {
   if (previous.result !== next.result) return false;
   if (previous.error !== next.error) return false;
   if (previous.status !== next.status) return false;
+  if (!toolCallTimingPropsEqual(previous, next)) return false;
   if (previous.detail !== next.detail) return false;
   if (previous.cwd !== next.cwd) return false;
   if (previous.metadata !== next.metadata) return false;

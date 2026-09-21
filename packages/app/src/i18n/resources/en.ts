@@ -2273,6 +2273,10 @@ export const en = {
       detailLevel: {
         title: "Detail level",
       },
+      timingMetadata: {
+        title: "Show response and tool timings",
+        description: "Show elapsed time while generating and after responses and tools finish",
+      },
       chatOutline: {
         title: "Chat outline",
         description: "Show an outline for jumping between prompts",

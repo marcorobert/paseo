@@ -93,6 +93,7 @@ export interface AppSettings {
   sidebarNavItems: SidebarNavPreference[];
   autoExpandReasoning: boolean;
   toolCallDetailLevel: ToolCallDetailLevel;
+  showTimingMetadata: boolean;
   chatOutlineEnabled: boolean;
   vimKeybindings: boolean;
   /** Desktop-only preferences for implicit opens into the ordinary side pane. */
@@ -147,6 +148,7 @@ export const DEFAULT_CLIENT_SETTINGS: AppSettings = {
   sidebarNavItems: [],
   autoExpandReasoning: false,
   toolCallDetailLevel: "detailed",
+  showTimingMetadata: false,
   chatOutlineEnabled: true,
   vimKeybindings: false,
   openInSidePane: DEFAULT_OPEN_IN_SIDE_PANE_PREFERENCES,
@@ -246,6 +248,7 @@ const StoredAppSettingsSchema = z
       .catch("detailed"),
     // COMPAT(compactToolCalls): migrated in v0.1.105, remove after 2027-01-12.
     compactToolCalls: z.boolean().optional().catch(undefined),
+    showTimingMetadata: z.boolean().catch(false),
     chatOutlineEnabled: z.boolean().catch(true),
     vimKeybindings: z.boolean().catch(false),
     openInSidePane: z

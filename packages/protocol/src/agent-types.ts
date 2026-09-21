@@ -313,6 +313,10 @@ interface ToolCallBase {
   type: "tool_call";
   callId: string;
   name: string;
+  /** Timestamp of the first lifecycle event for this call, when known. */
+  startedAt?: string;
+  /** Timestamp of the terminal lifecycle event for this call, when known. */
+  completedAt?: string;
   detail: ToolCallDetail;
   metadata?: Record<string, unknown>;
 }

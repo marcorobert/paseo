@@ -156,6 +156,7 @@ function renderStreamItemWithTurnFooter(input: {
   layoutItem: StreamLayoutItem;
   strategy: TurnContentStrategy;
   supportsTimelineCursor: boolean;
+  showTimingMetadata: boolean;
   onForkAssistantTurn?: AssistantTurnForkHandler;
 }): ReactNode {
   if (!input.content) {
@@ -168,6 +169,7 @@ function renderStreamItemWithTurnFooter(input: {
       strategy={input.strategy}
       items={footerHost.items}
       timing={footerHost.timing}
+      showTimingMetadata={input.showTimingMetadata}
       startIndex={footerHost.startIndex}
       supportsTimelineCursor={input.supportsTimelineCursor}
       onForkAssistantTurn={input.onForkAssistantTurn}
@@ -348,6 +350,7 @@ const AgentStreamViewComponent = forwardRef<AgentStreamViewHandle, AgentStreamVi
     const { t } = useTranslation();
     const autoExpandReasoning = useSettings((settings) => settings.autoExpandReasoning);
     const toolCallDetailLevel = useSettings((settings) => settings.toolCallDetailLevel);
+    const showTimingMetadata = useSettings((settings) => settings.showTimingMetadata);
     const chatOutlineEnabled = useSettings((settings) => settings.chatOutlineEnabled);
     const viewportRef = useRef<StreamViewportHandle | null>(null);
     const pendingClientMessageIds = useMemo(
@@ -784,6 +787,9 @@ const AgentStreamViewComponent = forwardRef<AgentStreamViewHandle, AgentStreamVi
               toolName={data.name}
               error={data.error}
               status={data.status}
+              startedAt={item.startedAt}
+              completedAt={item.completedAt}
+              showTimingMetadata={showTimingMetadata}
               detail={data.detail}
               cwd={context.cwd}
               metadata={data.metadata}
@@ -803,13 +809,16 @@ const AgentStreamViewComponent = forwardRef<AgentStreamViewHandle, AgentStreamVi
             args={data.arguments}
             result={data.result}
             status={data.status}
+            startedAt={item.startedAt}
+            completedAt={item.completedAt}
+            showTimingMetadata={showTimingMetadata}
             isLastInSequence={isLastInSequence}
             onOpenFilePath={handleToolCallOpenFile}
             maxDetailHeight={maxDetailHeight}
           />
         );
       },
-      [context.cwd, setInlineDetailsExpanded, handleToolCallOpenFile],
+      [context.cwd, handleToolCallOpenFile, setInlineDetailsExpanded, showTimingMetadata],
     );
 
     // Read through a stable event so live group updates do not change the renderer identity
@@ -913,6 +922,7 @@ const AgentStreamViewComponent = forwardRef<AgentStreamViewHandle, AgentStreamVi
           layoutItem,
           strategy: streamRenderStrategy,
           supportsTimelineCursor: supportsAgentForkContextCursor,
+          showTimingMetadata,
           onForkAssistantTurn: readOnly ? undefined : handleForkAssistantTurn,
         });
       },
@@ -920,6 +930,7 @@ const AgentStreamViewComponent = forwardRef<AgentStreamViewHandle, AgentStreamVi
         handleForkAssistantTurn,
         readOnly,
         renderStreamItemContent,
+        showTimingMetadata,
         streamRenderStrategy,
         supportsAgentForkContextCursor,
       ],
@@ -944,6 +955,7 @@ const AgentStreamViewComponent = forwardRef<AgentStreamViewHandle, AgentStreamVi
           <TurnFooter
             isRunning={isTurnActive}
             inFlightTurnStartedAt={baseRenderModel.turnTiming.runningStartedAt}
+            showTimingMetadata={showTimingMetadata}
             host={bottomTurnFooterHost}
             strategy={streamRenderStrategy}
             supportsTimelineCursor={supportsAgentForkContextCursor}
@@ -958,6 +970,7 @@ const AgentStreamViewComponent = forwardRef<AgentStreamViewHandle, AgentStreamVi
         isTurnActive,
         baseRenderModel.turnTiming.runningStartedAt,
         bottomTurnFooterHost,
+        showTimingMetadata,
         streamRenderStrategy,
         supportsAgentForkContextCursor,
       ],

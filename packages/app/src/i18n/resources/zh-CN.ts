@@ -2129,6 +2129,10 @@ export const zhCN: TranslationResources = {
       detailLevel: {
         title: "详细程度",
       },
+      timingMetadata: {
+        title: "显示响应和工具耗时",
+        description: "在生成过程中以及响应和工具完成后显示经过的时间",
+      },
       chatOutline: {
         title: "聊天大纲",
         description: "显示用于在提示词之间跳转的大纲",
