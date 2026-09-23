@@ -35,9 +35,20 @@ describe("Theme catalog", () => {
       "claude",
       "ghostty",
       "pureBlack",
+      "obsidian",
+      "nord",
+      "forest",
+      "emerald",
+      "ocean",
+      "dracula",
+      "rosePine",
+      "ember",
+      "solarizedDark",
+      "cyberpunk",
     ]);
     expect(getNextThemePreference("dark")).toBe("auto");
-    expect(getNextThemePreference("pureBlack")).toBe("light");
+    expect(getNextThemePreference("pureBlack")).toBe("obsidian");
+    expect(getNextThemePreference("cyberpunk")).toBe("light");
   });
 });
 

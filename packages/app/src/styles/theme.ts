@@ -716,6 +716,247 @@ const pureBlackDarkColors = buildDarkSemanticColors({
 
 export const darkPureBlackTheme = buildDarkTheme(pureBlackDarkColors);
 
+// Obsidian — cool charcoal with a soft silver accent.
+const obsidianDarkColors = buildDarkSemanticColors({
+  surface0: "#111318",
+  surface1: "#191C23",
+  surface2: "#222630",
+  surface3: "#333844",
+  surface4: "#454B59",
+  surfaceDiffEmpty: "#1D2027",
+  surfaceSidebar: "#0D0F14",
+  foreground: "#F3F4F6",
+  foregroundMuted: "#A4A9B4",
+  foregroundExtraMuted: "#707783",
+  border: "#2A2E38",
+  borderAccent: "#343A46",
+  accent: "#9AA4B2",
+  accentBright: "#CBD1DA",
+  accentForeground: "#111318",
+  destructive: "#D35D60",
+  terminalBlack: "#0D0F14",
+  terminalBrightBlack: "#4E5562",
+  ring: "#CBD1DA",
+});
+
+// Nord — icy blue-gray inspired by arctic palettes.
+const nordDarkColors = buildDarkSemanticColors({
+  surface0: "#111923",
+  surface1: "#1A2531",
+  surface2: "#24313E",
+  surface3: "#354656",
+  surface4: "#475A6D",
+  surfaceDiffEmpty: "#1F2C37",
+  surfaceSidebar: "#0D141C",
+  foreground: "#E8EEF4",
+  foregroundMuted: "#9CAABB",
+  foregroundExtraMuted: "#6F8294",
+  border: "#304254",
+  borderAccent: "#3A4F63",
+  accent: "#88C0D0",
+  accentBright: "#B5E0EA",
+  accentForeground: "#111923",
+  destructive: "#D76B75",
+  terminalBlack: "#0D141C",
+  terminalBrightBlack: "#536779",
+  ring: "#B5E0EA",
+});
+
+// Forest — muted green surfaces with a natural sage accent.
+const forestDarkColors = buildDarkSemanticColors({
+  surface0: "#101916",
+  surface1: "#18241F",
+  surface2: "#22332A",
+  surface3: "#33483C",
+  surface4: "#466052",
+  surfaceDiffEmpty: "#1D2B24",
+  surfaceSidebar: "#0C1411",
+  foreground: "#EAF4ED",
+  foregroundMuted: "#A0B5A8",
+  foregroundExtraMuted: "#6F8778",
+  border: "#2C4036",
+  borderAccent: "#365044",
+  accent: "#86B98B",
+  accentBright: "#B6DDB7",
+  accentForeground: "#101916",
+  destructive: "#D66B65",
+  terminalBlack: "#0C1411",
+  terminalBrightBlack: "#526557",
+  ring: "#B6DDB7",
+});
+
+// Emerald — deeper teal-green with a brighter mint identity.
+const emeraldDarkColors = buildDarkSemanticColors({
+  surface0: "#0D1918",
+  surface1: "#142522",
+  surface2: "#1C332E",
+  surface3: "#2B4840",
+  surface4: "#3C6258",
+  surfaceDiffEmpty: "#172D29",
+  surfaceSidebar: "#091311",
+  foreground: "#E6F7F0",
+  foregroundMuted: "#91B8AA",
+  foregroundExtraMuted: "#5F897C",
+  border: "#245049",
+  borderAccent: "#2D625A",
+  accent: "#45D6A0",
+  accentBright: "#86F0C5",
+  accentForeground: "#0D1918",
+  destructive: "#E06E72",
+  terminalBlack: "#091311",
+  terminalBrightBlack: "#4C7066",
+  ring: "#86F0C5",
+});
+
+// Ocean — dark blue surfaces with a clear cyan accent.
+const oceanDarkColors = buildDarkSemanticColors({
+  surface0: "#0D1722",
+  surface1: "#142433",
+  surface2: "#1C3346",
+  surface3: "#2B4860",
+  surface4: "#3C617A",
+  surfaceDiffEmpty: "#172B3B",
+  surfaceSidebar: "#09121B",
+  foreground: "#E8F3FA",
+  foregroundMuted: "#92AFC2",
+  foregroundExtraMuted: "#5F7F95",
+  border: "#2B4860",
+  borderAccent: "#35607A",
+  accent: "#45BCE8",
+  accentBright: "#8BDFFF",
+  accentForeground: "#0D1722",
+  destructive: "#E0717B",
+  terminalBlack: "#09121B",
+  terminalBrightBlack: "#4E6F86",
+  ring: "#8BDFFF",
+});
+
+// Dracula — violet surfaces with a soft lavender accent.
+const draculaDarkColors = buildDarkSemanticColors({
+  surface0: "#17151F",
+  surface1: "#211D2B",
+  surface2: "#2D273A",
+  surface3: "#403650",
+  surface4: "#55486A",
+  surfaceDiffEmpty: "#272131",
+  surfaceSidebar: "#120F18",
+  foreground: "#F8F8F2",
+  foregroundMuted: "#A9A5B8",
+  foregroundExtraMuted: "#706A84",
+  border: "#3A3249",
+  borderAccent: "#4A3F5C",
+  accent: "#BD93F9",
+  accentBright: "#D8B9FF",
+  accentForeground: "#17151F",
+  destructive: "#FF7A85",
+  terminalBlack: "#120F18",
+  terminalBrightBlack: "#5B506F",
+  ring: "#D8B9FF",
+});
+
+// Rose Pine — muted plum surfaces with a dusty rose accent.
+const rosePineDarkColors = buildDarkSemanticColors({
+  surface0: "#191724",
+  surface1: "#1F1D2E",
+  surface2: "#2A2740",
+  surface3: "#3A3556",
+  surface4: "#4B446E",
+  surfaceDiffEmpty: "#252237",
+  surfaceSidebar: "#13111D",
+  foreground: "#E0DEF4",
+  foregroundMuted: "#908CAA",
+  foregroundExtraMuted: "#6E6A86",
+  border: "#393552",
+  borderAccent: "#4A4568",
+  accent: "#EBBCBA",
+  accentBright: "#F6D6D5",
+  accentForeground: "#191724",
+  destructive: "#EB6F92",
+  terminalBlack: "#13111D",
+  terminalBrightBlack: "#615A7D",
+  ring: "#F6D6D5",
+});
+
+// Ember — warm brown-black surfaces with a red-orange accent.
+const emberDarkColors = buildDarkSemanticColors({
+  surface0: "#1B1312",
+  surface1: "#261B19",
+  surface2: "#332420",
+  surface3: "#4A2D27",
+  surface4: "#624037",
+  surfaceDiffEmpty: "#2D1F1D",
+  surfaceSidebar: "#130D0D",
+  foreground: "#FFF1EA",
+  foregroundMuted: "#C0A49B",
+  foregroundExtraMuted: "#8D6F68",
+  border: "#4A2D27",
+  borderAccent: "#5D3A31",
+  accent: "#F27A5B",
+  accentBright: "#FFB09A",
+  accentForeground: "#1B1312",
+  destructive: "#FF7168",
+  terminalBlack: "#130D0D",
+  terminalBrightBlack: "#70483D",
+  ring: "#FFB09A",
+});
+
+// Solarized Dark — deep teal surfaces with the classic gold accent.
+const solarizedDarkColors = buildDarkSemanticColors({
+  surface0: "#002B36",
+  surface1: "#073642",
+  surface2: "#0D414C",
+  surface3: "#1E4D55",
+  surface4: "#34636A",
+  surfaceDiffEmpty: "#0A3A43",
+  surfaceSidebar: "#00232C",
+  foreground: "#EEE8D5",
+  foregroundMuted: "#93A1A1",
+  foregroundExtraMuted: "#657B83",
+  border: "#1E4D55",
+  borderAccent: "#2B5D63",
+  accent: "#B58900",
+  accentBright: "#D8B14E",
+  accentForeground: "#002B36",
+  destructive: "#DC5F5F",
+  terminalBlack: "#00232C",
+  terminalBrightBlack: "#4C6D73",
+  ring: "#D8B14E",
+});
+
+// Cyberpunk — violet-black surfaces with a neon magenta accent.
+const cyberpunkDarkColors = buildDarkSemanticColors({
+  surface0: "#130F1B",
+  surface1: "#1E1629",
+  surface2: "#2C1F3B",
+  surface3: "#3F2A52",
+  surface4: "#593B6F",
+  surfaceDiffEmpty: "#261A33",
+  surfaceSidebar: "#0E0B14",
+  foreground: "#F7F1FF",
+  foregroundMuted: "#B3A2C2",
+  foregroundExtraMuted: "#806C96",
+  border: "#3F2A52",
+  borderAccent: "#503667",
+  accent: "#FF4FD8",
+  accentBright: "#FF9AEB",
+  accentForeground: "#130F1B",
+  destructive: "#FF6B81",
+  terminalBlack: "#0E0B14",
+  terminalBrightBlack: "#664576",
+  ring: "#FF9AEB",
+});
+
+export const darkObsidianTheme = buildDarkTheme(obsidianDarkColors);
+export const darkNordTheme = buildDarkTheme(nordDarkColors);
+export const darkForestTheme = buildDarkTheme(forestDarkColors);
+export const darkEmeraldTheme = buildDarkTheme(emeraldDarkColors);
+export const darkOceanTheme = buildDarkTheme(oceanDarkColors);
+export const darkDraculaTheme = buildDarkTheme(draculaDarkColors);
+export const darkRosePineTheme = buildDarkTheme(rosePineDarkColors);
+export const darkEmberTheme = buildDarkTheme(emberDarkColors);
+export const darkSolarizedDarkTheme = buildDarkTheme(solarizedDarkColors);
+export const darkCyberpunkTheme = buildDarkTheme(cyberpunkDarkColors);
+
 const lightShadow = {
   sm: {
     shadowColor: "rgba(0, 0, 0, 0.02)",
@@ -805,6 +1046,76 @@ export const THEME_OPTIONS = [
     unistylesName: "darkPureBlack",
     theme: darkPureBlackTheme,
     swatch: "#000000",
+  },
+  {
+    name: "obsidian",
+    group: "variant",
+    unistylesName: "darkObsidian",
+    theme: darkObsidianTheme,
+    swatch: "#9AA4B2",
+  },
+  {
+    name: "nord",
+    group: "variant",
+    unistylesName: "darkNord",
+    theme: darkNordTheme,
+    swatch: "#88C0D0",
+  },
+  {
+    name: "forest",
+    group: "variant",
+    unistylesName: "darkForest",
+    theme: darkForestTheme,
+    swatch: "#86B98B",
+  },
+  {
+    name: "emerald",
+    group: "variant",
+    unistylesName: "darkEmerald",
+    theme: darkEmeraldTheme,
+    swatch: "#45D6A0",
+  },
+  {
+    name: "ocean",
+    group: "variant",
+    unistylesName: "darkOcean",
+    theme: darkOceanTheme,
+    swatch: "#45BCE8",
+  },
+  {
+    name: "dracula",
+    group: "variant",
+    unistylesName: "darkDracula",
+    theme: darkDraculaTheme,
+    swatch: "#BD93F9",
+  },
+  {
+    name: "rosePine",
+    group: "variant",
+    unistylesName: "darkRosePine",
+    theme: darkRosePineTheme,
+    swatch: "#EBBCBA",
+  },
+  {
+    name: "ember",
+    group: "variant",
+    unistylesName: "darkEmber",
+    theme: darkEmberTheme,
+    swatch: "#F27A5B",
+  },
+  {
+    name: "solarizedDark",
+    group: "variant",
+    unistylesName: "darkSolarizedDark",
+    theme: darkSolarizedDarkTheme,
+    swatch: "#B58900",
+  },
+  {
+    name: "cyberpunk",
+    group: "variant",
+    unistylesName: "darkCyberpunk",
+    theme: darkCyberpunkTheme,
+    swatch: "#FF4FD8",
   },
 ] as const;
 
