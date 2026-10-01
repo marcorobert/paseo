@@ -3,6 +3,7 @@ const path = require("node:path");
 const pkg = require("./package.json");
 const withAndroidAsyncStorageSize = require("./plugins/with-android-async-storage-size");
 const withAndroidProfileable = require("./plugins/with-android-profileable");
+const withAndroidTrustUserCas = require("./plugins/with-android-trust-user-cas");
 const withFdroidAutolinking = require("./plugins/with-fdroid-autolinking");
 const withPasteInput = require("./plugins/with-paste-input");
 const withAndroidScroll = require("./modules/paseo-scroll/app.plugin");
@@ -100,7 +101,7 @@ export default {
     name: variant.name,
     slug: "voice-mobile",
     version: nativeReleaseVersion.appVersion,
-    orientation: "portrait",
+    orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "paseo",
     userInterfaceStyle: "automatic",
@@ -170,7 +171,9 @@ export default {
         "expo-build-properties",
         {
           android: {
-            minSdkVersion: 29,
+            // API 24 (Android 7.0) is the React Native 0.81 / Expo SDK 54 floor. Kept here so a
+            // 2016-class tablet (Galaxy Tab S2, SM-T810) can sideload a build.
+            minSdkVersion: 24,
             kotlinVersion: "2.1.20",
             // Allow HTTP connections for local network hosts in release builds
             usesCleartextTraffic: true,
@@ -179,6 +182,9 @@ export default {
       ],
       ...buildProfile.fdroidPlugins,
       ...(isProfileBuild ? [withAndroidProfileable] : []),
+      // Opt-in: trust user-installed CAs alongside the system store. Needed on devices
+      // whose platform CA store predates the roots a server presents.
+      ...(process.env.PASEO_ANDROID_TRUST_USER_CAS === "1" ? [withAndroidTrustUserCas] : []),
     ],
     experiments: {
       typedRoutes: true,

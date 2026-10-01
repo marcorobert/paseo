@@ -38,6 +38,17 @@ config.resolver.extraNodeModules = {
   "react/jsx-runtime": path.join(appNodeModulesRoot, "react/jsx-runtime"),
   "react/jsx-dev-runtime": path.join(appNodeModulesRoot, "react/jsx-dev-runtime"),
 };
+// The Android Gradle build sets EXPO_NO_METRO_WORKSPACE_ROOT so the bundler's entry file
+// resolves against packages/app instead of the monorepo root (React Native passes
+// --entry-file relative on Windows only; see docs). Restore monorepo visibility for
+// module resolution through watchFolders, which is what the workspace serverRoot
+// provided. Scoped to that build so default behaviour is untouched.
+if (process.env.EXPO_NO_METRO_WORKSPACE_ROOT === "1") {
+  config.server = config.server ?? {};
+  config.server.unstable_serverRoot = projectRoot;
+  config.watchFolders = [path.resolve(projectRoot, "../..")];
+}
+
 config.resolver.blockList = new RegExp(
   `(^${escapedAppSrcRoot}${pathSeparatorPattern}.*\\.(test|spec)\\.(ts|tsx)$|${pathSeparatorPattern}__tests__${pathSeparatorPattern}.*)$`,
 );
