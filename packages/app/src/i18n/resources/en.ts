@@ -2249,6 +2249,11 @@ export const en = {
         stable: "Stable",
         beta: "Beta",
       },
+      automaticUpdates: {
+        label: "Automatic updates",
+        description:
+          "Check, download, and install updates automatically. You can still check manually when this is off.",
+      },
       updates: {
         label: "App updates",
         readyToInstall: "Ready to install: {{version}}",

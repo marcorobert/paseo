@@ -2161,6 +2161,11 @@ export const ptBR: TranslationResources = {
         stable: "Stable",
         beta: "Beta",
       },
+      automaticUpdates: {
+        label: "Atualizações automáticas",
+        description:
+          "Verifique, baixe e instale atualizações automaticamente. Você ainda pode verificar manualmente se desativar esta opção.",
+      },
       updates: {
         label: "Atualizações do app",
         readyToInstall: "Pronta para instalar: {{version}}",

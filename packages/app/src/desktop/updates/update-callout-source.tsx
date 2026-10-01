@@ -42,6 +42,7 @@ export function UpdateCalloutSource() {
   const { theme } = useUnistyles();
   const {
     isDesktopApp,
+    automaticUpdatesEnabled,
     status,
     availableUpdate,
     errorMessage,
@@ -58,7 +59,7 @@ export function UpdateCalloutSource() {
     void checkForUpdates();
   });
   useEffect(() => {
-    if (!isDesktopApp) return;
+    if (!isDesktopApp || !automaticUpdatesEnabled) return;
 
     void checkForUpdates({ intent: "automatic", silent: true });
 
@@ -71,7 +72,7 @@ export function UpdateCalloutSource() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isDesktopApp, checkForUpdates]);
+  }, [automaticUpdatesEnabled, isDesktopApp, checkForUpdates]);
 
   useEffect(() => {
     const descriptor = resolveUpdateCalloutDescriptor({

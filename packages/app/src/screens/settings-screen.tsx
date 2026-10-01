@@ -88,6 +88,7 @@ import { DesktopNotificationsSection } from "@/desktop/components/desktop-notifi
 import { BrowserDataSection } from "@/desktop/browser/settings/browser-data-section";
 import { IntegrationsSection } from "@/desktop/components/integrations-section";
 import { isElectronRuntime } from "@/desktop/host";
+import { useDesktopSettings } from "@/desktop/settings/desktop-settings";
 import { useDesktopAppUpdater } from "@/desktop/updates/use-desktop-app-updater";
 import { formatVersionWithPrefix } from "@/desktop/updates/desktop-updates";
 import { resolveAppVersion, resolveAppVersionLabel } from "@/utils/app-version";
@@ -602,6 +603,12 @@ function DesktopAppUpdateRow() {
   const { t } = useTranslation();
   const { settings, updateSettings } = useSettings();
   const {
+    settings: desktopSettings,
+    isLoading: isDesktopSettingsLoading,
+    isSaving: isDesktopSettingsSaving,
+    updateSettings: updateDesktopSettings,
+  } = useDesktopSettings();
+  const {
     isDesktopApp,
     statusText,
     availableUpdate,
@@ -634,6 +641,14 @@ function DesktopAppUpdateRow() {
       void updateSettings({ releaseChannel });
     },
     [updateSettings],
+  );
+  const handleAutomaticUpdatesChange = useCallback(
+    (automaticUpdatesEnabled: boolean) => {
+      void updateDesktopSettings({ automaticUpdatesEnabled }).catch(() => {
+        // useDesktopSettings owns the user-visible IPC error.
+      });
+    },
+    [updateDesktopSettings],
   );
   const releaseChannelOptions = useMemo(
     () => [
@@ -691,6 +706,21 @@ function DesktopAppUpdateRow() {
           value={settings.releaseChannel}
           onValueChange={handleReleaseChannelChange}
           options={releaseChannelOptions}
+        />
+      </View>
+      <View style={[settingsStyles.row, settingsStyles.rowBorder]}>
+        <View style={settingsStyles.rowContent}>
+          <Text style={settingsStyles.rowTitle}>{t("settings.about.automaticUpdates.label")}</Text>
+          <Text style={settingsStyles.rowHint}>
+            {t("settings.about.automaticUpdates.description")}
+          </Text>
+        </View>
+        <Switch
+          value={desktopSettings.automaticUpdatesEnabled}
+          onValueChange={handleAutomaticUpdatesChange}
+          disabled={isDesktopSettingsLoading || isDesktopSettingsSaving}
+          accessibilityLabel={t("settings.about.automaticUpdates.label")}
+          testID="desktop-automatic-updates-switch"
         />
       </View>
       <View style={[settingsStyles.row, settingsStyles.rowBorder]}>

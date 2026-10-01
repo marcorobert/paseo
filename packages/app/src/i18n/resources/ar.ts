@@ -2126,6 +2126,11 @@ export const ar: TranslationResources = {
         stable: "Stable",
         beta: "Beta",
       },
+      automaticUpdates: {
+        label: "التحديثات التلقائية",
+        description:
+          "تحقق من التحديثات ونزّلها وثبّتها تلقائيًا. يمكنك التحقق يدويًا عند إيقاف هذا الخيار.",
+      },
       updates: {
         label: "تحديثات التطبيق",
         readyToInstall: "جاهز للتثبيت:{{version}}",

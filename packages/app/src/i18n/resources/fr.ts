@@ -2182,6 +2182,11 @@ export const fr: TranslationResources = {
         stable: "Stable",
         beta: "Beta",
       },
+      automaticUpdates: {
+        label: "Mises à jour automatiques",
+        description:
+          "Rechercher, télécharger et installer les mises à jour automatiquement. Vous pouvez toujours les rechercher manuellement si cette option est désactivée.",
+      },
       updates: {
         label: "Mises à jour de l'application",
         readyToInstall: "Prêt à installer:{{version}}",

@@ -2137,6 +2137,11 @@ export const ko: TranslationResources = {
         stable: "안정",
         beta: "베타",
       },
+      automaticUpdates: {
+        label: "자동 업데이트",
+        description:
+          "업데이트를 자동으로 확인하고 다운로드 및 설치합니다. 이 옵션을 꺼도 수동으로 확인할 수 있습니다.",
+      },
       updates: {
         label: "앱 업데이트",
         readyToInstall: "설치 준비됨: {{version}}",

@@ -22,6 +22,7 @@ export type { DesktopAppUpdateStatus };
 
 export interface UseDesktopAppUpdaterReturn {
   isDesktopApp: boolean;
+  automaticUpdatesEnabled: boolean;
   status: DesktopAppUpdateStatus;
   statusText: string;
   availableUpdate: DesktopAppUpdateCheckResult | null;
@@ -38,8 +39,9 @@ export interface UseDesktopAppUpdaterReturn {
 
 export function useDesktopAppUpdater(): UseDesktopAppUpdaterReturn {
   const isDesktopApp = shouldShowDesktopUpdateSection();
-  const { settings: desktopSettings } = useDesktopSettings();
+  const { settings: desktopSettings, isLoading: isDesktopSettingsLoading } = useDesktopSettings();
   const releaseChannel = desktopSettings.releaseChannel;
+  const automaticUpdatesEnabled = desktopSettings.automaticUpdatesEnabled;
   const reportError = useDesktopIpcErrorReporter();
 
   const updater = useMemo(
@@ -66,13 +68,17 @@ export function useDesktopAppUpdater(): UseDesktopAppUpdaterReturn {
       if (!isDesktopApp) {
         return null;
       }
+      const intent = options.intent ?? "manual";
+      if (intent === "automatic" && (isDesktopSettingsLoading || !automaticUpdatesEnabled)) {
+        return null;
+      }
       return updater.checkForUpdates({
         releaseChannel,
-        intent: options.intent ?? "manual",
+        intent,
         silent: options.silent,
       });
     },
-    [isDesktopApp, releaseChannel, updater],
+    [automaticUpdatesEnabled, isDesktopApp, isDesktopSettingsLoading, releaseChannel, updater],
   );
 
   const installUpdate = useCallback(async () => {
@@ -83,14 +89,19 @@ export function useDesktopAppUpdater(): UseDesktopAppUpdaterReturn {
   }, [isDesktopApp, releaseChannel, updater]);
 
   useEffect(() => {
-    if (!isDesktopApp) {
+    if (!isDesktopApp || isDesktopSettingsLoading || !automaticUpdatesEnabled) {
       return;
     }
     void checkForUpdates({ intent: "automatic", silent: true });
-  }, [checkForUpdates, isDesktopApp]);
+  }, [automaticUpdatesEnabled, checkForUpdates, isDesktopApp, isDesktopSettingsLoading]);
 
   useEffect(() => {
-    if (!isDesktopApp || snapshot.status !== "pending") {
+    if (
+      !isDesktopApp ||
+      isDesktopSettingsLoading ||
+      !automaticUpdatesEnabled ||
+      snapshot.status !== "pending"
+    ) {
       return undefined;
     }
 
@@ -101,10 +112,17 @@ export function useDesktopAppUpdater(): UseDesktopAppUpdaterReturn {
     return () => {
       clearInterval(intervalId);
     };
-  }, [checkForUpdates, isDesktopApp, snapshot.status]);
+  }, [
+    automaticUpdatesEnabled,
+    checkForUpdates,
+    isDesktopApp,
+    isDesktopSettingsLoading,
+    snapshot.status,
+  ]);
 
   return {
     isDesktopApp,
+    automaticUpdatesEnabled,
     status: snapshot.status,
     statusText: formatStatusText({
       status: snapshot.status,

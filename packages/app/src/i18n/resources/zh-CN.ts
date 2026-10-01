@@ -2102,6 +2102,10 @@ export const zhCN: TranslationResources = {
         stable: "Stable",
         beta: "Beta",
       },
+      automaticUpdates: {
+        label: "自动更新",
+        description: "自动检查、下载并安装更新。关闭后仍可手动检查。",
+      },
       updates: {
         label: "应用更新",
         readyToInstall: "可安装：{{version}}",

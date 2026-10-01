@@ -8,6 +8,7 @@ import type { AppReleaseChannel } from "../features/auto-updater.js";
 
 export interface DesktopSettings {
   releaseChannel: AppReleaseChannel;
+  automaticUpdatesEnabled: boolean;
   notifications: {
     playSound: boolean;
   };
@@ -19,6 +20,7 @@ export interface DesktopSettings {
 
 interface DesktopSettingsPatch {
   releaseChannel?: AppReleaseChannel;
+  automaticUpdatesEnabled?: boolean;
   notifications?: Partial<DesktopSettings["notifications"]>;
   daemon?: Partial<DesktopSettings["daemon"]>;
 }
@@ -31,6 +33,7 @@ export interface DesktopSettingsStore {
 
 export const DEFAULT_DESKTOP_SETTINGS: DesktopSettings = {
   releaseChannel: "stable",
+  automaticUpdatesEnabled: true,
   notifications: {
     playSound: true,
   },
@@ -60,6 +63,7 @@ const DaemonSchema = z
 const DesktopSettingsSchema = z
   .looseObject({
     releaseChannel: ReleaseChannelSchema.catch(DEFAULT_DESKTOP_SETTINGS.releaseChannel),
+    automaticUpdatesEnabled: z.boolean().catch(DEFAULT_DESKTOP_SETTINGS.automaticUpdatesEnabled),
     notifications: NotificationsSchema,
     daemon: DaemonSchema,
   })
@@ -106,6 +110,7 @@ function isNodeError(error: unknown): error is NodeJS.ErrnoException {
 function buildDefaultSettings(): StoredDesktopSettings {
   return {
     releaseChannel: DEFAULT_DESKTOP_SETTINGS.releaseChannel,
+    automaticUpdatesEnabled: DEFAULT_DESKTOP_SETTINGS.automaticUpdatesEnabled,
     notifications: { ...DEFAULT_DESKTOP_SETTINGS.notifications },
     daemon: { ...DEFAULT_DESKTOP_SETTINGS.daemon },
   };
@@ -125,6 +130,7 @@ function buildDefaultDocument(): PersistedDesktopSettingsDocument {
 function toDesktopSettings(stored: StoredDesktopSettings): DesktopSettings {
   return {
     releaseChannel: stored.releaseChannel,
+    automaticUpdatesEnabled: stored.automaticUpdatesEnabled,
     notifications: { playSound: stored.notifications.playSound },
     daemon: {
       manageBuiltInDaemon: stored.daemon.manageBuiltInDaemon,
@@ -142,6 +148,11 @@ function coerceDesktopSettingsPatch(input: unknown): DesktopSettingsPatch {
   const releaseChannel = coerceReleaseChannel(input.releaseChannel);
   if (releaseChannel) {
     patch.releaseChannel = releaseChannel;
+  }
+
+  const automaticUpdatesEnabled = coerceBoolean(input.automaticUpdatesEnabled);
+  if (automaticUpdatesEnabled !== null) {
+    patch.automaticUpdatesEnabled = automaticUpdatesEnabled;
   }
 
   if (isRecord(input.notifications)) {
@@ -197,6 +208,7 @@ function mergeDesktopSettings(
   return {
     ...current,
     releaseChannel: patch.releaseChannel ?? current.releaseChannel,
+    automaticUpdatesEnabled: patch.automaticUpdatesEnabled ?? current.automaticUpdatesEnabled,
     notifications: { ...current.notifications, ...patch.notifications },
     daemon: { ...current.daemon, ...patch.daemon },
   };

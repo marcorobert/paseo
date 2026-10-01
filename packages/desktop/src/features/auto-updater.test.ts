@@ -4,7 +4,7 @@ import path from "node:path";
 import { UUID } from "builder-util-runtime";
 import { describe, expect, it, vi } from "vitest";
 
-const { autoUpdaterMock } = vi.hoisted(() => {
+const { autoUpdaterMock, desktopSettingsGetMock } = vi.hoisted(() => {
   const handlers = new Map<string, (value: unknown) => void>();
   return {
     autoUpdaterMock: {
@@ -22,6 +22,7 @@ const { autoUpdaterMock } = vi.hoisted(() => {
       }),
       quitAndInstall: vi.fn(),
     },
+    desktopSettingsGetMock: vi.fn(async () => ({ automaticUpdatesEnabled: true })),
   };
 });
 
@@ -36,6 +37,10 @@ vi.mock("electron-updater", () => ({
   autoUpdater: autoUpdaterMock,
 }));
 
+vi.mock("../settings/desktop-settings-electron.js", () => ({
+  getDesktopSettingsStore: () => ({ get: desktopSettingsGetMock }),
+}));
+
 import {
   bucketFromStagingUserId,
   checkForAppUpdate,
@@ -47,6 +52,28 @@ import {
 } from "./auto-updater";
 
 describe("checkForAppUpdate", () => {
+  it("skips automatic checks when automatic updates are disabled", async () => {
+    desktopSettingsGetMock.mockResolvedValueOnce({ automaticUpdatesEnabled: false });
+    autoUpdaterMock.checkForUpdates.mockClear();
+
+    const result = await checkForAppUpdate({
+      currentVersion: "1.2.3",
+      releaseChannel: "stable",
+      intent: "automatic",
+    });
+
+    expect(result).toEqual({
+      hasUpdate: false,
+      readyToInstall: false,
+      currentVersion: "1.2.3",
+      latestVersion: "1.2.3",
+      body: null,
+      date: null,
+      errorMessage: null,
+    });
+    expect(autoUpdaterMock.checkForUpdates).not.toHaveBeenCalled();
+  });
+
   it("treats an unpublished channel manifest as an unavailable update", async () => {
     const error = Object.assign(new Error("Cannot find latest-mac.yml"), {
       code: "ERR_UPDATER_CHANNEL_FILE_NOT_FOUND",
@@ -143,11 +170,45 @@ describe("checkForAppUpdate", () => {
 });
 
 describe("shouldInstallAppUpdateOnQuit", () => {
+  it("does not install downloaded updates on quit when automatic updates are disabled", () => {
+    expect(
+      shouldInstallAppUpdateOnQuit({
+        platform: "win32",
+        isAppImage: false,
+        automaticUpdatesEnabled: false,
+      }),
+    ).toBe(false);
+  });
+
   it("keeps Linux AppImage updates on the manual install path", () => {
-    expect(shouldInstallAppUpdateOnQuit({ platform: "linux", isAppImage: true })).toBe(false);
-    expect(shouldInstallAppUpdateOnQuit({ platform: "linux", isAppImage: false })).toBe(true);
-    expect(shouldInstallAppUpdateOnQuit({ platform: "darwin", isAppImage: false })).toBe(true);
-    expect(shouldInstallAppUpdateOnQuit({ platform: "win32", isAppImage: false })).toBe(true);
+    expect(
+      shouldInstallAppUpdateOnQuit({
+        platform: "linux",
+        isAppImage: true,
+        automaticUpdatesEnabled: true,
+      }),
+    ).toBe(false);
+    expect(
+      shouldInstallAppUpdateOnQuit({
+        platform: "linux",
+        isAppImage: false,
+        automaticUpdatesEnabled: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldInstallAppUpdateOnQuit({
+        platform: "darwin",
+        isAppImage: false,
+        automaticUpdatesEnabled: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldInstallAppUpdateOnQuit({
+        platform: "win32",
+        isAppImage: false,
+        automaticUpdatesEnabled: true,
+      }),
+    ).toBe(true);
   });
 });
 

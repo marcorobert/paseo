@@ -81,6 +81,7 @@ describe("desktop-settings", () => {
 
     expect(settings).toEqual({
       releaseChannel: "stable",
+      automaticUpdatesEnabled: true,
       notifications: { playSound: true },
       daemon: {
         manageBuiltInDaemon: true,
@@ -97,12 +98,14 @@ describe("desktop-settings", () => {
     await store.get();
     const next = await store.patch({
       releaseChannel: "beta",
+      automaticUpdatesEnabled: false,
       daemon: { keepRunningAfterQuit: false },
     });
     const files = await readdir(userDataPath);
 
     expect(next).toEqual({
       releaseChannel: "beta",
+      automaticUpdatesEnabled: false,
       notifications: { playSound: true },
       daemon: {
         manageBuiltInDaemon: true,
@@ -136,6 +139,7 @@ describe("desktop-settings", () => {
     const settings = await createDesktopSettingsStore({ userDataPath }).get();
 
     expect(settings.notifications.playSound).toBe(true);
+    expect(settings.automaticUpdatesEnabled).toBe(true);
   });
 
   it("keeps an explicit notification sound choice across restarts", async () => {
@@ -270,6 +274,7 @@ describe("desktop-settings", () => {
 
     expect(migrated).toEqual({
       releaseChannel: "beta",
+      automaticUpdatesEnabled: true,
       notifications: { playSound: true },
       daemon: {
         manageBuiltInDaemon: false,
@@ -315,6 +320,7 @@ describe("desktop-settings", () => {
     expect(persisted.settings.releaseChannel).toBe("beta");
     expect(next).toEqual({
       releaseChannel: "beta",
+      automaticUpdatesEnabled: true,
       notifications: { playSound: false },
       daemon: { manageBuiltInDaemon: true, keepRunningAfterQuit: false },
     });

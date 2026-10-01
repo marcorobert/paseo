@@ -5,6 +5,7 @@ import { app } from "electron";
 import { UUID } from "builder-util-runtime";
 import log from "electron-log/main";
 import { autoUpdater } from "electron-updater";
+import { getDesktopSettingsStore } from "../settings/desktop-settings-electron.js";
 import {
   createAppUpdateService,
   type AppUpdateCheckResult,
@@ -134,10 +135,11 @@ export function getStagingUserId(): Promise<string> {
 export function shouldInstallAppUpdateOnQuit(input: {
   platform: NodeJS.Platform;
   isAppImage: boolean;
+  automaticUpdatesEnabled: boolean;
 }): boolean {
   // AppImage's no-relaunch install path blocks while launching the replacement
   // binary, which can hang after the running file has already been replaced.
-  return !(input.platform === "linux" && input.isAppImage);
+  return input.automaticUpdatesEnabled && !(input.platform === "linux" && input.isAppImage);
 }
 
 class ElectronAppUpdateRuntime implements AppUpdateRuntime {
@@ -252,6 +254,27 @@ export async function checkForAppUpdate({
   intent: AppUpdateCheckIntent;
 }): Promise<AppUpdateCheckResult> {
   updateLifecycleLog.checkStarted({ currentVersion, releaseChannel, intent });
+  if (intent === "automatic" && !(await getDesktopSettingsStore().get()).automaticUpdatesEnabled) {
+    const result: AppUpdateCheckResult = {
+      hasUpdate: false,
+      readyToInstall: false,
+      currentVersion,
+      latestVersion: currentVersion,
+      body: null,
+      date: null,
+      errorMessage: null,
+    };
+    updateLifecycleLog.checkCompleted({
+      currentVersion,
+      targetVersion: result.latestVersion,
+      releaseChannel,
+      intent,
+      hasUpdate: result.hasUpdate,
+      readyToInstall: result.readyToInstall,
+      errorMessage: result.errorMessage,
+    });
+    return result;
+  }
   const result = await appUpdateService.checkForAppUpdate({
     currentVersion,
     releaseChannel,
@@ -288,16 +311,19 @@ export async function downloadAndInstallUpdate(
 export async function installAppUpdateOnQuit({
   currentVersion,
   releaseChannel,
+  automaticUpdatesEnabled,
   signal,
 }: {
   currentVersion: string;
   releaseChannel: AppReleaseChannel;
+  automaticUpdatesEnabled: boolean;
   signal: AbortSignal;
 }): Promise<boolean> {
   if (
     !shouldInstallAppUpdateOnQuit({
       platform: process.platform,
       isAppImage: Boolean(process.env.APPIMAGE),
+      automaticUpdatesEnabled,
     })
   ) {
     return false;

@@ -2145,6 +2145,11 @@ export const ja: TranslationResources = {
         stable: "安定版",
         beta: "ベータ",
       },
+      automaticUpdates: {
+        label: "自動更新",
+        description:
+          "更新を自動で確認、ダウンロード、インストールします。オフにしても手動で確認できます。",
+      },
       updates: {
         label: "アプリの更新",
         readyToInstall: "インストール準備完了: {{version}}",

@@ -2178,6 +2178,11 @@ export const es: TranslationResources = {
         stable: "Stable",
         beta: "Beta",
       },
+      automaticUpdates: {
+        label: "Actualizaciones automáticas",
+        description:
+          "Buscar, descargar e instalar actualizaciones automáticamente. Puedes seguir buscándolas manualmente si desactivas esta opción.",
+      },
       updates: {
         label: "Actualizaciones de aplicaciones",
         readyToInstall: "Listo para instalar:{{version}}",
